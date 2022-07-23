@@ -16,26 +16,25 @@ module.exports.getUserById = (req, res) => {
   const id = req.params.userId;
   User.findById(id)
     .then((user) => {
-      if (!id) {
-        res.status(404).send('Пользователь по указанному _id не найден');
+      if (!user) {
+        res.status(404).send('Пользователь с указанным _id не найден');
         return;
       }
       res.status(200).send(user);
     })
-    .catch(() => res.status(500).send('Ошибка по умолчанию')); // Ошибка сервера
+    .catch((err) => res.status(500).send('Ошибка по умолчанию')); // Ошибка сервера
 };
 
 module.exports.createUser = (req, res) => {
   User.create({ ...req.body })
-    .then((user) => {
-      if (!user) {
-        res.status(400).send('Переданы некорректные данные при создании пользователя');
-        return;
+    .then((user) => { res.status(200).send(user) })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send('Переданы некорректные данные при создании пользователя');
       }
-      res.status(200).send(user);
-    })
-    .catch(() => res.status(500).send('Ошибка по умолчанию'));
-};
+      res.status(500).send('Ошибка по умолчанию')})
+}
+
 
 module.exports.patchProfile = (req, res) => {
   User.findByIdAndUpdate(
