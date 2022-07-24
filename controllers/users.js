@@ -46,11 +46,10 @@ module.exports.createUser = (req, res) => {
 module.exports.patchProfile = (req, res) => {
   const userId = req.user._id;
   const { name, about } = req.body;
-  User.findByIdAndUpdate(userId, { name, about }, (err, user) => {
+  User.findByIdAndUpdate(userId, { name, about }, (err) => {
     if (err) {
-      console.log(err.message);
+      res.status(400).send({ message: 'Переданы некорректные данные при обновлении пользователя' });
     }
-    console.log(user);
   })
     .then((user) => {
       if (!user) {
@@ -65,18 +64,13 @@ module.exports.patchProfile = (req, res) => {
 module.exports.patchAvatar = (req, res) => {
   const userId = req.user._id;
   const { avatar } = req.body;
-  User.findByIdAndUpdate(userId, { avatar }, (err, user) => {
+  User.findByIdAndUpdate(userId, { avatar }, (err) => {
     if (err) {
-      console.log(err.message);
+      res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
     }
-    console.log(user);
   })
     .then((user) => {
-      if (!user) {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-        return;
-      }
-      res.status(200).send(user);
+      res.status(200).send({ avatar: user.avatar });
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };

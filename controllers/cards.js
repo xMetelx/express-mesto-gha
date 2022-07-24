@@ -28,13 +28,19 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(
   req.params.cardId,
-  (err) => {
-    if (err) {
+  () => {
+    if (!req.params.cardId) {
       res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
     }
   },
 )
-  .then((card) => { res.status(200).send(card); })
+  .then((card) => {
+    if (!card) {
+      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
+      return;
+    }
+    res.status(200).send({ message: 'Ваша карточка успешно удалена' });
+  })
   .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
@@ -43,13 +49,13 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { new: true },
   (err) => {
     if (err) {
-      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
+      res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
     }
   },
 )
   .then((card) => {
     if (!card) {
-      res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
       return;
     }
     res.status(200).send(card);
