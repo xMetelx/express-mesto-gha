@@ -57,7 +57,7 @@ module.exports.patchProfile = (req, res) => {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
         return;
       }
-      res.status(200).send({ name: user.name, about: user.about });
+      res.status(200).send(user);
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
@@ -76,7 +76,7 @@ module.exports.patchAvatar = (req, res) => {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
         return;
       }
-      res.status(200).send({ avatar: user.avatar });
+      res.status(200).send(user);
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
