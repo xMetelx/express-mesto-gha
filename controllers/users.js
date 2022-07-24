@@ -22,7 +22,13 @@ module.exports.getUserById = (req, res) => {
       }
       res.status(200).send(user);
     })
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' })); // Ошибка сервера
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при запросе пользователя' });
+        return;
+      }
+      res.status(500).send({ message: 'Ошибка по умолчанию' });
+    }); // Ошибка сервера
 };
 
 module.exports.createUser = (req, res) => {
@@ -38,33 +44,33 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.patchProfile = (req, res) => {
-  User.findByIdAndUpdate(
-    { _id: req.user._id }, // добавить ошибку 404 — Пользователь с указанным _id не найден.
-    {
-      name: req.body.name,
-      about: req.body.about,
-    },
-    (err) => {
-      if (err) {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-    },
-  )
+  const userId = req.user._id;
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(userId, { name, about }, (err, user) => {
+    if (err) {
+      console.log(err.message);
+    }
+    console.log(user);
+  })
     .then((user) => {
       if (!user) {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
         return;
       }
-      res.status(200).send(user);
+      res.status(200).send({ name: user.name, about: user.about });
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
 
 module.exports.patchAvatar = (req, res) => {
-  User.findByIdAndUpdate(
-    { _id: req.user._id }, // добавить ошибку 404 — Пользователь с указанным _id не найден.
-    { avatar: req.body.avatar },
-  )
+  const userId = req.user._id;
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(userId, { avatar }, (err, user) => {
+    if (err) {
+      console.log(err.message);
+    }
+    console.log(user);
+  })
     .then((user) => {
       if (!user) {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
