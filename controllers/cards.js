@@ -26,17 +26,21 @@ module.exports.createCard = (req, res) => {
     }); // Ошибка сервера
 };
 
-module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(
-  req.params.cardId,
-  () => {
-    if (!req.params.cardId) {
-      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
-    }}
-)
-  .then(() => {
+module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.cardId)
+  .then((card) => {
+    if (!card) {
+      res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+      return;
+    }
     res.status(200).send({ message: 'Ваша карточка успешно удалена' });
   })
-  .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      return;
+    }
+    res.status(500).send({ message: 'Ошибка по умолчанию' })
+});
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { _id: req.params.cardId },
@@ -75,3 +79,4 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     res.status(200).send(card);
   })
   .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
+  
