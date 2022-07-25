@@ -46,6 +46,7 @@ module.exports.createUser = (req, res) => {
 module.exports.patchProfile = (req, res) => {
   const userId = req.user._id;
   const { name, about } = req.body;
+  console.log(userId);
   User.findByIdAndUpdate(userId, { name, about }, (err) => {
     if (err) {
       res.status(400).send({ message: 'Переданы некорректные данные при обновлении пользователя' });
@@ -53,7 +54,7 @@ module.exports.patchProfile = (req, res) => {
   })
     .then((user) => {
       if (!user) {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
         return;
       }
       res.status(200).send(user);
