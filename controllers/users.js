@@ -47,7 +47,7 @@ module.exports.patchProfile = (req, res) => {
   const userId = req.user._id;
   const { name, about } = req.body;
   console.log(userId);
-  User.findByIdAndUpdate(userId, { name, about })
+  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
@@ -58,15 +58,16 @@ module.exports.patchProfile = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении пользователя'})
+        return;
       }
-      res.status(500).send({ message: 'Ошибка по умолчанию' })
+      res.status(500).send({ message: err.message })
     });
 };
 
 module.exports.patchAvatar = (req, res) => {
   const userId = req.user._id;
   const { avatar } = req.body;
-  User.findByIdAndUpdate(userId, { avatar })
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
@@ -76,7 +77,8 @@ module.exports.patchAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении пользователя'})
+        res.status(400).send({ message: 'Переданы некорректные данные при обновлении пользователя'});
+        return;
       }
       res.status(500).send({ message: 'Ошибка по умолчанию' })
     });
