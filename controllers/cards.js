@@ -39,8 +39,8 @@ module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.card
       res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
       return;
     }
-    res.status(500).send({ message: 'Ошибка по умолчанию' })
-});
+    res.status(500).send({ message: 'Ошибка по умолчанию' });
+  });
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { _id: req.params.cardId },
@@ -79,4 +79,3 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     res.status(200).send(card);
   })
   .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
-  

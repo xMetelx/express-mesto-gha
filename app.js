@@ -8,10 +8,10 @@ const app = express();
 const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
-// id - 62de6889ebc62b2bf4dc9d30
+// id - 62deebaf1052723ffc819d7f
 app.use((req, res, next) => {
   req.user = {
-    _id: '62de6889ebc62b2bf4dc9d30',
+    _id: '62deebaf1052723ffc819d7f',
   };
   next();
 });
