@@ -7,8 +7,8 @@ const userRouter = express.Router();
 
 userRouter.get('/', getUsers);
 userRouter.get('/:userId', getUserById);
-userRouter.post('/', express.json(), createUser);
-userRouter.patch('/me', express.json(), patchProfile);
-userRouter.patch('/me/avatar', express.json(), patchAvatar);
+userRouter.post('/', createUser);
+userRouter.patch('/me', patchProfile);
+userRouter.patch('/me/avatar', patchAvatar);
 
 module.exports = userRouter;

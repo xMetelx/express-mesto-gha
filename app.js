@@ -8,6 +8,7 @@ const app = express();
 const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 // id - 62deebaf1052723ffc819d7f
 app.use((req, res, next) => {
   req.user = {
