@@ -9,10 +9,10 @@ const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// id - 62deebaf1052723ffc819d7f
+// id - 62e06bc2f4eaca62b8b37fb6
 app.use((req, res, next) => {
   req.user = {
-    _id: '62cf11fd4b739a15acf099c1',
+    _id: '62e06bc2f4eaca62b8b37fb6',
   };
   next();
 });
