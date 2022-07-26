@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // id - 62deebaf1052723ffc819d7f
 app.use((req, res, next) => {
   req.user = {
-    _id: '62deebaf1052723ffc819d7f',
+    _id: '62cf11fd4b739a15acf099c1',
   };
   next();
 });
