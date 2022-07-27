@@ -44,10 +44,13 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.patchProfile = (req, res) => {
-  const userId = req.user._id;
   const { name, about } = req.body;
-  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
+  User.findByIdAndUpdate({ _id: req.user._id }, { name, about }, { new: true, runValidators: true })
     .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+        return;
+      }
       res.status(200).send({ data: user });
     })
     .catch((err) => {
