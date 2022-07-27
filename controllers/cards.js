@@ -2,12 +2,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .populate(['owner', 'likes'])
     .then((cards) => {
-      if (!cards) {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
-        return;
-      }
       res.status(200).send(cards);
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' })); // Ошибка сервера
@@ -46,11 +41,6 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { _id: req.params.cardId },
   { $addToSet: { likes: { cardId: req.user._id } } }, // добавить _id в массив, если его там нет
   { new: true },
-  (err) => {
-    if (err) {
-      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
-    }
-  },
 )
   .then((card) => {
     if (!card) {
@@ -59,17 +49,18 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
     }
     res.status(200).send(card);
   })
-  .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      return;
+    }
+    res.status(500).send({ message: 'Ошибка по умолчанию' });
+});
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
+  { _id: req.params.cardId },
   { $pull: { likes: { cardId: req.user._id } } }, // убрать _id из массива
   { new: true },
-  (err) => {
-    if (err) {
-      res.status(400).send({ message: 'Переданы некорректные данные при запросе карточки' });
-    }
-  },
 )
   .then((card) => {
     if (!card) {
@@ -78,4 +69,10 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     }
     res.status(200).send(card);
   })
-  .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
+  .catch(() => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      return;
+    }
+    res.status(500).send({ message: 'Ошибка по умолчанию' });
+  });

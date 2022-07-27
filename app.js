@@ -12,14 +12,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // id - 62e06bc2f4eaca62b8b37fb6
 app.use((req, res, next) => {
   req.user = {
-    _id: '62e06bc2f4eaca62b8b37fb6',
+    _id: '62e10afb1c14b545045b60b2',
   };
   next();
 });
 
 app.use('/cards', cardRouter);
 app.use('/users', userRouter);
-app.patch('/404', (req, res) => {
+app.use((req, res) => {
   res.status(404).send({ message: 'Запрашиваемой страницы не существует' });
 });
 
