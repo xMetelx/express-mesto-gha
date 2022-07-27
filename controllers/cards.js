@@ -55,7 +55,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
       return;
     }
     res.status(500).send({ message: 'Ошибка по умолчанию' });
-});
+  });
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { _id: req.params.cardId },
@@ -69,7 +69,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     }
     res.status(200).send(card);
   })
-  .catch(() => {
+  .catch((err) => {
     if (err.name === 'CastError') {
       res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
       return;
