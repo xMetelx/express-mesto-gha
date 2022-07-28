@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -28,6 +30,7 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
+  const { name, about, avatar, email, password } = req.body;
   User.create({ ...req.body })
     .then((user) => { res.status(200).send({ data: user }); })
     .catch((err) => {
@@ -77,4 +80,23 @@ module.exports.patchAvatar = (req, res) => {
       }
       res.status(500).send({ message: 'Ошибка по умолчанию' });
     });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        res.status(403).send({ message: 'Пользователь не зарегистрирован' });
+        return;
+      }
+      bcrypt.compare(password, user.password, (err, isValidPassword) => {
+        if (!isValidPassword) {
+          res.status(401).send({ message: 'Пароль неверный' });
+          return;
+        }
+        res.status(200).send(user.email);
+      });
+    })
+    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };

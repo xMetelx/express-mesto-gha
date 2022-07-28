@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -10,12 +12,11 @@ const { PORT = 3000 } = process.env;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // id - 62e06bc2f4eaca62b8b37fb6
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62e10afb1c14b545045b60b2',
-  };
-  next();
-});
+
+userRouter.post('/signup', createUser);
+userRouter.post('/signin', login);
+
+app.use(auth);
 
 app.use('/cards', cardRouter);
 app.use('/users', userRouter);
