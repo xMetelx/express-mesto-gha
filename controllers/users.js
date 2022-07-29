@@ -26,20 +26,54 @@ module.exports.getUserById = (req, res) => {
         return;
       }
       res.status(500).send({ message: 'Ошибка по умолчанию' });
-    }); // Ошибка сервера
+    });
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
-  User.create({ ...req.body })
-    .then((user) => { res.status(200).send({ data: user }); })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+    if (!email || !password) {
+      return res.status(400).send({ message: 'Email или пароль не переданы' });
+    };
+
+    const hash = bcrypt.hash(password, SALT_ROUNDS);
+
+    User.findOne({email})
+      .then((user) => {
+        if (user) {
+          return res.status(409).send({ message: 'Пользователь с такими данными уже существует'});
+        }
+        User.create({ name: name, about: about, avatar: avatar, email: email, password: hash })
+          .then((user) => { res.status(201).send({ data: user }); 
+          })
+          .catch((err) => {
+            if (err.name === 'ValidationError') {
+              res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+              return;
+            }
+            res.status(500).send({ message: 'Ошибка по умолчанию' });
+          });
+      }) 
+      .catch(() => res.status(500).send({ message: "Ошибка по умолчанию"})); 
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      const token = jwt.sign({ _id: req.user._id }, 'secret', '7d')
+      if (!user) {
+        res.status(403).send({ message: 'Пользователь не зарегистрирован' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка по умолчанию' });
-    });
+      bcrypt.compare(password, user.password, (err, isValidPassword) => {
+        if (!isValidPassword) {
+          res.status(401).send({ message: 'Пароль неверный' });
+          return;
+        }
+        res.status(200).send(user.email);
+      });
+    })
+    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
 
 module.exports.patchProfile = (req, res) => {
@@ -80,23 +114,4 @@ module.exports.patchAvatar = (req, res) => {
       }
       res.status(500).send({ message: 'Ошибка по умолчанию' });
     });
-};
-
-module.exports.login = (req, res) => {
-  const { email, password } = req.body;
-  User.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        res.status(403).send({ message: 'Пользователь не зарегистрирован' });
-        return;
-      }
-      bcrypt.compare(password, user.password, (err, isValidPassword) => {
-        if (!isValidPassword) {
-          res.status(401).send({ message: 'Пароль неверный' });
-          return;
-        }
-        res.status(200).send(user.email);
-      });
-    })
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
