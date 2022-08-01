@@ -30,44 +30,65 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).send({ message: 'Email или пароль не переданы' });
-    };
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+  if (!email || !password) {
+    res.status(400).send({ message: 'Email или пароль не переданы' });
+  }
 
-    const hash = bcrypt.hash(req.body.password, 10);
+  const hash = bcrypt.hashSync(req.body.password, 10);
 
-    User.findOne({email})
-      .then((user) => {
-        if (user) {
-          return res.status(409).send({ message: 'Пользователь с такими данными уже существует'});
-        }
-        User.create({ name: req.body.name, about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
-          .then((user) => { res.status(201).send({ data: user }); 
-          })
-          .catch((err) => {
-            if (err.name === 'ValidationError') {
-              res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
-              return;
-            }
-            res.status(500).send({ message: 'Ошибка по умолчанию' });
-          });
-      }) 
-      .catch(() => res.status(500).send({ message: "Ошибка по умолчанию"})); 
+//   "data": {
+//     "name": "kiis",
+//     "about": "test",
+//     "avatar": "kxfhgvdfhjv.jpg",
+//     "_id": "62e835d7e93ea406acbfe54d",
+//     "password": "$2b$10$g3V.Ma8BRKBoQEvFq5PavOyiClm..Wz5oMrMRHZ6cv/aD6jY64ZpO",
+//     "email": "1777@YA.RU"
+// }
+
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        res.status(409).send({ message: 'Пользователь с такими данными уже существует' });
+      }
+      User.create({ ...req.body, password: hash })
+        .then((newUser) => res.status(201).send({ data: newUser }))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            res.status(400).send({ message: 'Переданы некорректные данные при регистрации пользователя' });
+            return;
+          }
+          res.status(500).send({ message: 'Ошибка по умолчанию' });
+        });
+    })
+    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
+
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        res.status(403).send({ message: 'Пользователь не зарегистрирован' });
+      console.log(user);
+
+      // res.send(user)
+
+      const token = jwt.sign({ _id: req.user._id }, 'secret', { expiresIn: 604800 });
+      res.status(200).send({ token, message: 'Аутентификация прошла успешно' });
+    })
+    .catch((err) => { //дописать ошибку 401!!!
+      if (err.name === 'ValidationError') {
+        res.status(401).send({ message: 'Переданы некорректные данные при обновлении пользователя' });
         return;
       }
-      const token = jwt.sign({ _id: req.user._id }, 'secret', { expiresIn: 604800 } )
-      res.send({ token });
-    })
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
+      res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.patchProfile = (req, res) => {

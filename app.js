@@ -6,9 +6,14 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { schemaValidation } = require('./middlewares/validation');
+const {
+  userValidation,
+  profileValidation,
+  avatarValidation,
+  cardValidation,
+} = require('./middlewares/validation');
 
-console.log(process.env.NODE_ENV)
+console.log(process.env.NODE_ENV);
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -25,11 +30,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-userRouter.post('/signup', schemaValidation, createUser);
-userRouter.post('/signin', login);
+app.post('/signup', createUser); // добавить валидацию - мидлвэр
+app.post('/signin', login);
 
-app.use('/cards', auth, schemaValidation, cardRouter);
-app.use('/users', auth, schemaValidation, userRouter);
+app.use('/cards', auth, cardValidation, cardRouter);
+app.use('/users', auth, userRouter); //profileValidation, avatarValidation
 app.use((req, res, next) => {
   next(new NotFoundError('Запрашиваемой страницы не существует'));
 });
