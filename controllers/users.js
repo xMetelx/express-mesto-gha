@@ -35,14 +35,14 @@ module.exports.createUser = (req, res) => {
       return res.status(400).send({ message: 'Email или пароль не переданы' });
     };
 
-    const hash = bcrypt.hash(password, SALT_ROUNDS);
+    const hash = bcrypt.hash(req.body.password, 10);
 
     User.findOne({email})
       .then((user) => {
         if (user) {
           return res.status(409).send({ message: 'Пользователь с такими данными уже существует'});
         }
-        User.create({ name: name, about: about, avatar: avatar, email: email, password: hash })
+        User.create({ name: req.body.name, about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
           .then((user) => { res.status(201).send({ data: user }); 
           })
           .catch((err) => {
@@ -58,20 +58,14 @@ module.exports.createUser = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email }).select('+password')
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: req.user._id }, 'secret', '7d')
       if (!user) {
         res.status(403).send({ message: 'Пользователь не зарегистрирован' });
         return;
       }
-      bcrypt.compare(password, user.password, (err, isValidPassword) => {
-        if (!isValidPassword) {
-          res.status(401).send({ message: 'Пароль неверный' });
-          return;
-        }
-        res.status(200).send(user.email);
-      });
+      const token = jwt.sign({ _id: req.user._id }, 'secret', { expiresIn: 604800 } )
+      res.send({ token });
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию' }));
 };

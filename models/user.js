@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator(v) {
+        return validator.isUrl(v);
+      },
+    },
   },
   email: {
     type: String,
@@ -37,5 +42,23 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 }, { versionKey: false });
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        res.status(403).send({ message: 'Пользователь не зарегистрирован' });
+        return;
+      }
+      return bcrypt.compare(password, user.password, (err, isValidPassword))
+        .then((isValidPassword) => {
+          if (!isValidPassword) {
+            res.status(401).send({ message: 'Пароль неверный' });
+            return;
+          }
+          res.status(200).send(user);
+        });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);

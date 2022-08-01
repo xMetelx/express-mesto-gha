@@ -10,7 +10,7 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  Card.create({ name, link, owner: req.user._id })
+  Card.create({ name: req.body.name, link: req.body.link, owner: req.user._id })
     .then((card) => { res.status(201).send(card); })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -21,13 +21,22 @@ module.exports.createCard = (req, res) => {
     }); // Ошибка сервера
 };
 
-module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.cardId)
+module.exports.deleteCard = (req, res) => Card.findById(req.params.cardId)
   .then((card) => {
-    if (!card) {
-      res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+
+    if (req.user._id !== card.owner._id) {
+      res.status(400).send({ message: 'Чужие карточки удалять запрещено' });
       return;
     }
-    res.status(200).send({ message: 'Ваша карточка успешно удалена' });
+
+    Card.findByIdAndRemove(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+        return;
+      }
+      res.status(200).send({ card,  message: 'Ваша карточка успешно удалена' });
+    })
   })
   .catch((err) => {
     if (err.name === 'CastError') {
