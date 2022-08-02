@@ -21,7 +21,7 @@ const profileValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required(false),
+    avatar: Joi.string(),
   }),
 });
 

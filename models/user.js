@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const UnauthorizedError = require('../utils/errors/UnauthorizedError');
+const ForbiddenError = require('../utils/errors/ForbiddenError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -48,14 +50,15 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Пользователя не существует')); // 403 ошибка
+        return Promise.reject(new ForbiddenError('Пользователя не существует'));
       }
-      return bcrypt.compare(password, user.password, (err, isValidPassword) => {
-        if (!isValidPassword) {
-          return Promise.reject(new Error(err.message)); // 401 err 'Неправильные почта или пароль'
-        }
-        return user;
-      });
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new UnauthorizedError('Переданы некорректные данные (логин ли пароль)'));
+          }
+          return user;
+        });
     });
 };
 
