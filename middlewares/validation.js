@@ -8,7 +8,10 @@ const userValidation = celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string(),
     email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    password: Joi.string().required().
+      messages({
+        'string.empty': 'Поле password должно быть заполнено',
+      }),
   }),
 });
 

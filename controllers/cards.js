@@ -17,7 +17,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => { res.status(201).send(card); })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при создании карточки');
+        next (new BadRequestError('Переданы некорректные данные при создании карточки'));
       }
       next(err);
     });
@@ -56,7 +56,7 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      throw new BadRequestError('Переданы некорректные данные при удалении карточки');
+      next (new BadRequestError('Переданы некорректные данные при удалении карточки'));
     }
     next(err);
   });

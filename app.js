@@ -6,7 +6,10 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { errors } = require('celebrate'); 
+const { userValidation } = require('./middlewares/validation');
 const NotFoundError = require('./utils/errors/NotFoundError');
+
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -23,14 +26,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/signup', createUser); // добавить валидацию - мидлвэр
+app.post('/signup', userValidation, createUser); // добавить валидацию - мидлвэр
 app.post('/signin', login);
 
 app.use(auth);
 
 app.use('/cards', cardRouter);
 app.use('/users', userRouter);
-app.use('/users', userRouter);
+
+app.use(errors());
+
 app.use((req, res, next) => {
   next(new NotFoundError('Запрашиваемой страницы не существует'));
 });
@@ -42,7 +47,7 @@ app.use((err, req, res, next) => {
     .status(statusCode)
     .send({
       message: statusCode === 500
-        ? 'Ошибка сервера'
+        ? err.message
         : message,
     });
 });
