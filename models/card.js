@@ -18,7 +18,6 @@ const cardSchema = new mongoose.Schema({
     //   },
     //   message: 'Cсылка передана неверно',
     // },
-    
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

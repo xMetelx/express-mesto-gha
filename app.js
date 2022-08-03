@@ -2,14 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const userRouter = require('./routes/users');
-const cardRouter = require('./routes/cards');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { errors } = require('celebrate'); 
 const { userValidation } = require('./middlewares/validation');
 const NotFoundError = require('./utils/errors/NotFoundError');
-
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -27,7 +26,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/signup', userValidation, createUser); // добавить валидацию - мидлвэр
-app.post('/signin', login);
+app.post('/signin', userValidation, login);
 
 app.use(auth);
 

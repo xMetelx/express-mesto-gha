@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
+
 const bcrypt = require('bcrypt');
+
+const isEmail = require('validator/lib/isEmail');
+
 const UnauthorizedError = require('../utils/errors/UnauthorizedError');
-const ForbiddenError = require('../utils/errors/ForbiddenError');
+
+// eslint-disable-next-line no-useless-escape
+// const regex = new RegExp('^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,11 +29,9 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     // validate: {
-    //   validator(avatar) {
-    //     return validator.isUrl(avatar);
-    //   },
-    //   message: 'Передайте ссылку',
+    //   validator: (avatar) => regex.test(avatar),
     // },
+    message: 'Передайте ссылку',
   },
   email: {
     type: String,
@@ -36,7 +39,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator(email) {
-        return validator.isEmail(email);
+        return isEmail(email);
       },
       message: 'Передайте электронную почту',
     },
@@ -52,7 +55,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new ForbiddenError('Пользователя не существует'));
+        return Promise.reject(new UnauthorizedError('Пользователя не существует'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {

@@ -49,11 +49,11 @@ module.exports.createUser = (req, res, next) => {
       if (user) {
         throw new ConflictError('Пользователь с такими данными уже существует');
       }
-      User.create({ ...req.body, password: hash })
-        .then((newUser) => res.status(201).send({ data: newUser, message: 'Пользователь успешно создан' }))
+      User.create({ name: req.body.name, about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
+        .then((newUser) => res.status(201).send({ data: newUser }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            next (new BadRequestError('Переданы некорректные данные при регистрации пользователя'));
+            next(new BadRequestError('Переданы некорректные данные при регистрации пользователя'));
           }
           next(err);
         });
