@@ -25,16 +25,19 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
   .then((card) => {
-    if (req.user._id !== card.owner._id.toString()) {
+    if (!card) {
+      throw new NotFoundError('Карточка с указанным _id не найдена');
+    } else if (req.user._id !== card.owner._id.toString()) {
       throw new ForbiddenError('Не хватает прав для удаления карточки');
+    } else {
+      Card.findByIdAndRemove(req.params.cardId)
+        .then((userCard) => {
+          if (!userCard) {
+            throw new NotFoundError('Карточка с указанным _id не найдена');
+          }
+          res.status(200).send({ userCard, message: 'Ваша карточка успешно удалена' });
+        });
     }
-    Card.findByIdAndRemove(req.params.cardId)
-      .then((userCard) => {
-        if (!userCard) {
-          throw new NotFoundError('Карточка с указанным _id не найдена');
-        }
-        res.status(200).send({ userCard, message: 'Ваша карточка успешно удалена' });
-      });
   })
   .catch((err) => {
     if (err.name === 'CastError') {
