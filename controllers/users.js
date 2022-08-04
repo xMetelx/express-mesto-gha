@@ -32,7 +32,7 @@ module.exports.getUserById = (req, res, next) => {
 
 module.exports.getMyProfile = (req, res, next) => {
   console.log(123)
-  User.findOne(req.user._id)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь с указанным _id не найден');
