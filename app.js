@@ -19,7 +19,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 })
+  // eslint-disable-next-line no-console
   .then(() => console.log('Mongo is ON'))
+  // eslint-disable-next-line no-console
   .catch(() => console.log('Mongoose error'));
 
 app.use(bodyParser.json());
@@ -41,7 +43,6 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
-
   res
     .status(statusCode)
     .send({
@@ -49,8 +50,10 @@ app.use((err, req, res, next) => {
         ? err.message
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-useless-escape
   console.log(`Приложение запущено на ${PORT} порте`);
 });

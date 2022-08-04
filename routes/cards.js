@@ -13,7 +13,7 @@ const {
 
 cardRouter.get('/', getCards);
 cardRouter.post('/', cardValidation, createCard);
-cardRouter.delete('/:cardId', deleteCard);
+cardRouter.delete('/:cardId', cardIdValidation, deleteCard);
 cardRouter.put('/:cardId/likes', cardIdValidation, likeCard);
 cardRouter.delete('/:cardId/likes', dislikeCard);
 

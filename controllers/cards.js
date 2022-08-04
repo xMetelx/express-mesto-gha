@@ -25,7 +25,7 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
   .then((card) => {
-    if (req.user._id !== card.owner._id) {
+    if (req.user._id !== card.owner._id.toString()) {
       throw new ForbiddenError('Не хватает прав для удаления карточки');
     }
     Card.findByIdAndRemove(req.params.cardId)
@@ -38,7 +38,7 @@ module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      throw new BadRequestError('Переданы некорректные данные при удалении карточки');
+      next(BadRequestError('Переданы некорректные данные при удалении карточки'));
     }
     next(err);
   });
@@ -56,7 +56,7 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      next (new BadRequestError('Переданы некорректные данные при удалении карточки'));
+      next(new BadRequestError('Переданы некорректные данные при удалении карточки'));
     }
     next(err);
   });

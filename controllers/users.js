@@ -31,7 +31,6 @@ module.exports.getUserById = (req, res, next) => {
 };
 
 module.exports.getMyProfile = (req, res, next) => {
-  console.log(123)
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
@@ -39,14 +38,11 @@ module.exports.getMyProfile = (req, res, next) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => res.send(err.message));
-}
+    .catch(next);
+};
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
     email,
     password,
   } = req.body;
@@ -61,8 +57,14 @@ module.exports.createUser = (req, res, next) => {
       if (user) {
         throw new ConflictError('Пользователь с такими данными уже существует');
       }
-      User.create({ name: req.body.name, about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
-        .then((newUser) => res.status(201).send({ 
+      User.create({
+        name: req.body.name,
+        about: req.body.about,
+        avatar: req.body.avatar,
+        email: req.body.email,
+        password: hash,
+      })
+        .then((newUser) => res.status(201).send({
           name: newUser.name,
           about: newUser.about,
           avatar: newUser.avatar,
@@ -101,7 +103,7 @@ module.exports.patchProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next (new BadRequestError('Переданы некорректные данные при обновлении пользователя'));
+        next(new BadRequestError('Переданы некорректные данные при обновлении пользователя'));
       }
       next(err);
     });
@@ -119,7 +121,7 @@ module.exports.patchAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next (new BadRequestError('Переданы некорректные данные при обновлении пользователя'));
+        next(new BadRequestError('Переданы некорректные данные при обновлении пользователя'));
       }
       next(err);
     });
