@@ -74,7 +74,7 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      throw new BadRequestError('Переданы некорректные данные при удалении карточки');
+      next(new BadRequestError('Переданы некорректные данные при удалении карточки'));
     }
     next(err);
   });
