@@ -7,7 +7,7 @@ const isEmail = require('validator/lib/isEmail');
 const UnauthorizedError = require('../utils/errors/UnauthorizedError');
 
 // eslint-disable-next-line no-useless-escape
-// const regex = new RegExp('^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)');
+const regex = new RegExp(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/);
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -28,9 +28,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    // validate: {
-    //   validator: (avatar) => regex.test(avatar),
-    // },
+    validate: {
+      validator: (avatar) => regex.test(avatar),
+    },
     message: 'Передайте ссылку',
   },
   email: {

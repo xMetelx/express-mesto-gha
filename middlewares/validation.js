@@ -1,4 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
+const pattern = ""
 
 const userValidation = celebrate({
   body: Joi.object().keys({
@@ -32,7 +33,7 @@ const profileValidation = celebrate({
 const avatarValidation = celebrate({
   body: Joi.object().keys({
     // eslint-disable-next-line no-useless-escape
-    avatar: Joi.string().regex('^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)'),
+    avatar: Joi.string().regex(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/),
   }),
 });
 
