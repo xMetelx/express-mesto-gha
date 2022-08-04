@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
+
+// eslint-disable-next-line no-useless-escape
+const regex = new RegExp(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/);
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -11,13 +13,10 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
-    // validate: {
-    //   validator(link) {
-    //     validator.isUrl(link);
-    //     return;
-    //   },
-    //   message: 'Cсылка передана неверно',
-    // },
+    validate: {
+      validator: (link) => regex.test(link),
+    },
+    message: 'Передайте ссылку',
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

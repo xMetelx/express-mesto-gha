@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-
 const bcrypt = require('bcrypt');
-
 const isEmail = require('validator/lib/isEmail');
 
 const UnauthorizedError = require('../utils/errors/UnauthorizedError');
@@ -49,7 +47,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
-}, { versionKey: false });
+}, { versionKey: false, new: true, runValidators: true });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')

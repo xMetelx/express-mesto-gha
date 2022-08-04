@@ -30,6 +30,18 @@ module.exports.getUserById = (req, res, next) => {
     });
 };
 
+module.exports.getMyProfile = (req, res, next) => {
+  console.log(123)
+  User.findOne(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь с указанным _id не найден');
+      }
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => res.send(err.message));
+}
+
 module.exports.createUser = (req, res, next) => {
   const {
     name,
@@ -50,7 +62,12 @@ module.exports.createUser = (req, res, next) => {
         throw new ConflictError('Пользователь с такими данными уже существует');
       }
       User.create({ name: req.body.name, about: req.body.about, avatar: req.body.avatar, email: req.body.email, password: hash })
-        .then((newUser) => res.status(201).send({ data: newUser }))
+        .then((newUser) => res.status(201).send({ 
+          name: newUser.name,
+          about: newUser.about,
+          avatar: newUser.avatar,
+          email: newUser.email,
+        }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
             next(new BadRequestError('Переданы некорректные данные при регистрации пользователя'));

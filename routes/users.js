@@ -3,6 +3,7 @@ const express = require('express');
 const {
   getUsers,
   getUserById,
+  getMyProfile,
   patchProfile,
   patchAvatar,
 } = require('../controllers/users');
@@ -18,6 +19,7 @@ const {
 
 userRouter.get('/', userValidation, getUsers);
 userRouter.get('/:userId', userIdValidation, getUserById);
+userRouter.get('/me', getMyProfile);
 userRouter.patch('/me', profileValidation, patchProfile);
 userRouter.patch('/me/avatar', avatarValidation, patchAvatar);
 

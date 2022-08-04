@@ -1,11 +1,12 @@
 const { celebrate, Joi } = require('celebrate');
-const pattern = ""
 
 const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().regex(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/).messages({
+      'string.base': `Введите URL`,
+    }),
     email: Joi.string().email().required().messages({
       'string.empty': 'Проверьте email',
     }),
@@ -33,14 +34,18 @@ const profileValidation = celebrate({
 const avatarValidation = celebrate({
   body: Joi.object().keys({
     // eslint-disable-next-line no-useless-escape
-    avatar: Joi.string().regex(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/),
+    avatar: Joi.string().regex(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/).messages({
+      'string.base': `Введите URL`,
+    })
   }),
 });
 
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().regex(/^( http|https):\/\/(www\.)?([a-z0-9\._])+([\w+\-\-._~:/?#\[\]!$&’()*+,;=-])+(#?)/).messages({
+      'string.base': `Введите URL`,
+    })
   }),
 });
 
