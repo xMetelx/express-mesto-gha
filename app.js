@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-require('dotenv').config();
 const { errors } = require('celebrate');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const config = require('./utils/config');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { userValidation } = require('./middlewares/validation');
@@ -13,7 +15,14 @@ const cardRouter = require('./routes/cards');
 const app = express();
 const { PORT = 3000 } = process.env;
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+mongoose.connect(config.serverDb, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -26,6 +35,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(helmet());
+app.use(limiter);
 
 app.post('/signup', userValidation, createUser); // добавить валидацию - мидлвэр
 app.post('/signin', userValidation, login);

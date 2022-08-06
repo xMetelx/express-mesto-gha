@@ -5,6 +5,8 @@ const NotFoundError = require('../utils/errors/NotFoundError'); //  404
 const BadRequestError = require('../utils/errors/BadRequestError'); //  400
 const ConflictError = require('../utils/errors/ConflictError'); // 409
 
+const config = require('../utils/config');
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
@@ -16,29 +18,34 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUserById = (req, res, next) => {
   const id = req.params.userId;
   User.findById(id)
+    .orFail(new Error('NotFoundErr'))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
-      }
       res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotFoundErr') {
+        next(new NotFoundError('Пользователь с указанным _id не найден'));
+      } else if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при запросе пользователя'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
 module.exports.getMyProfile = (req, res, next) => {
   User.findById(req.user._id)
+    .orFail(new Error('NotFoundErr'))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
-      }
       res.status(200).send({ data: user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.message === 'NotFoundErr') {
+        next(new NotFoundError('Пользователь с указанным _id не найден'));
+      } else {
+        (next(err));
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -85,7 +92,7 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'secret', { expiresIn: 604800 });
+      const token = jwt.sign({ _id: user._id }, config.jwtSecret, { expiresIn: 604800 });
       res.status(200).send({ token, message: 'Аутентификация прошла успешно' });
     })
     .catch(next);
